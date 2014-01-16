@@ -19,6 +19,37 @@ chef-runner][blog post]*.
   while hacking on recipes.
 * Allows you to change infrastructure code and get **immediate feedback**.
 
+## Quick Start
+
+Start Vagrant machine inside cookbook folder:
+
+    $ cd my-awesome-cookbook/
+    $ vagrant up
+
+Use chef-runner to selectively run Chef recipes inside VM:
+
+    $ chef-runner # will run recipes/default.rb
+    $ chef-runner recipes/foo.rb
+    $ chef-runner foo
+    $ chef-runner dogs::bar
+    $ chef-runner recipes/foo.rb bar dogs::baz
+
+Load attributes from JSON file:
+
+    $ chef-runner -j chef.json
+
+Configure Chef output format and log level:
+
+    $ chef-runner -F doc -l warn
+
+Specify name of Vagrant machine:
+
+    $ chef-runner -M db
+
+Set hostname for direct SSH access:
+
+    $ chef-runner -H example.local
+
 ## How does it work?
 
 * chef-runner is a small shell script (~100 LOC).
