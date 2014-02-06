@@ -21,6 +21,8 @@
 set -e
 test -n "$CHEF_RUNNER_DEBUG" && set -x
 
+: ${TMPDIR:=/tmp}
+
 abort() { echo >&2 "$*"; exit 1; }
 
 file_must_exist() {
@@ -42,8 +44,9 @@ cookbook_path() {
     echo ${path:-"vendor/cookbooks"}
 }
 
-# Install cookbook dependencies with Berkshelf. If the cookbooks are already in
-# place, use lightning-fast rsync to update the current cookbook only.
+# Install cookbook dependencies with Berkshelf or Librarian-Chef. If the
+# cookbooks are already in place, use lightning-fast rsync to update the
+# current cookbook only.
 install_cookbooks() {
     if ! test -d "$COOKBOOK_PATH/$COOKBOOK_NAME"; then
         if test -f Gemfile; then
@@ -51,7 +54,16 @@ install_cookbooks() {
         else
             prefix=
         fi
-        $prefix berks install --path "$COOKBOOK_PATH"
+        if test -f Berksfile; then
+            $prefix berks install --path "$COOKBOOK_PATH"
+        elif test -f Cheffile; then
+            tmp_dir="$TMPDIR/chef-runner-$$"
+            $prefix librarian-chef install --path "$tmp_dir"
+            mkdir -p "$COOKBOOK_PATH"
+            rsync --archive --delete "$tmp_dir/" "$COOKBOOK_PATH"
+        else
+            :
+        fi
     else
         rsync --archive --delete --exclude="$COOKBOOK_PATH" * \
             "$COOKBOOK_PATH/$COOKBOOK_NAME"
