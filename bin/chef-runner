@@ -51,7 +51,7 @@ install_cookbooks() {
         else
             prefix=
         fi
-        $prefix berks install --path "$COOKBOOK_PATH"
+        $prefix berks vendor "$COOKBOOK_PATH"
     else
         rsync --archive --delete --exclude="$COOKBOOK_PATH" * \
             "$COOKBOOK_PATH/$COOKBOOK_NAME"
